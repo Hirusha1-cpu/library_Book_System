@@ -152,7 +152,35 @@ const refillEmployeeForm = (ob) =>{
 btnBookUpdate.addEventListener("click",()=>{
     console.log("Old =>",oldBook);
     console.log("New -<>",book);
+
+    returnErrorsUpdate = checkBookErrors();
+    if (returnErrorsUpdate == "") {
+        updates = checkBookFormUpdates();
+
+    }else{
+        alert("There is some errors happened...!")
+    }
 })
+const checkBookFormUpdates =()=>{
+    let updates ="";
+    if(book.name != oldBook.name){
+        updates = updates + "Book nmae was changed to "+book.name;
+        
+    }
+    if(book.edition != oldBook.edition){
+        updates = updates + "Book edition was changed to "+book.edition;
+
+    }
+    if(book.isbn != oldBook.isbn){
+        updates = updates + "Book isbn was changed to "+book.isbn;
+
+    }
+    if(book.langauge != oldBook.langauge){
+        updates = updates + "Book langauge was changed to "+book.langauge;
+
+    }
+}
+
 const deleteButtonFunction = () =>{
     console.log("Delete");
 }
