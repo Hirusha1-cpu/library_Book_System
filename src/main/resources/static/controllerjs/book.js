@@ -81,34 +81,13 @@ window.addEventListener("load", () => {
 
     }
 
-    const checkBookErrors = ()=>{
 
-        let errors = '';
+    refreshBookTable()
+  
+    
+})
 
-        if(book.name==null){
-            errors = errors+"Book Name is required! \n";
-        }
-        if(book.edition==null){
-            errors = errors+"Book Edition is required! \n";
-        }
-        if(book.isbn==null){
-            errors = errors+"Book ISBN is required! \n";
-        }
-        if(book.langauge==null){
-            errors = errors+"Book Language is required! \n";
-        }
-        if(book.authorId==null){
-            errors = errors+"Book Author is required! \n";
-        }
-        if(book.booktype_id==null){
-            errors = errors+"Book Type is required! \n";
-        }
-
-        return errors;
-
-    }
-
-    //table js
+const refreshBookTable = ()=>{
     books = ajaxRequest("/book/findall");
     console.log(books);
     displayProperyValues = [
@@ -118,14 +97,48 @@ window.addEventListener("load", () => {
         {property :"langauge" , dataType :'text'},
         {property :getBookTypeName , dataType :'function'},
         {property :getAuthorName , dataType :'function'},
+        {property :getDeleted, dataType :'function'},
         
     ]
     
     fillDataIntoTable(tblEmp, books, displayProperyValues, refillEmployeeForm, deleteButtonFunction, printEmployee, true)
+}
 
-  
-    
-})
+
+const checkBookErrors = ()=>{
+
+    let errors = '';
+
+    if(book.name==null){
+        errors = errors+"Book Name is required! \n";
+    }
+    if(book.edition==null){
+        errors = errors+"Book Edition is required! \n";
+    }
+    if(book.isbn==null){
+        errors = errors+"Book ISBN is required! \n";
+    }
+    if(book.langauge==null){
+        errors = errors+"Book Language is required! \n";
+    }
+    if(book.authorId==null){
+        errors = errors+"Book Author is required! \n";
+    }
+    if(book.booktype_id==null){
+        errors = errors+"Book Type is required! \n";
+    }
+
+    return errors;
+
+}
+const getDeleted = (ob)=>{
+    if (ob.deleted) {
+        return "True"
+    }else{
+        return "False"
+    }
+}
+
 const getAuthorName = (ob) =>{
     return ob.authorId.name
 
@@ -149,18 +162,6 @@ const refillEmployeeForm = (ob) =>{
 
     console.log("Re Fill");
 }
-btnBookUpdate.addEventListener("click",()=>{
-    console.log("Old =>",oldBook);
-    console.log("New -<>",book);
-
-    returnErrorsUpdate = checkBookErrors();
-    if (returnErrorsUpdate == "") {
-        updates = checkBookFormUpdates();
-
-    }else{
-        alert("There is some errors happened...!")
-    }
-})
 const checkBookFormUpdates =()=>{
     let updates ="";
     if(book.name != oldBook.name){
@@ -179,10 +180,98 @@ const checkBookFormUpdates =()=>{
         updates = updates + "Book langauge was changed to "+book.langauge;
 
     }
+    if(book.booktype_id.name != oldBook.booktype_id.name){
+        updates = updates + "Book type was changed to "+book.booktype_id.name;
+
+    }
+    if(book.authorId.name != oldBook.authorId.name){
+        updates = updates + "Book author was changed to "+book.authorId.name;
+
+    }
+    return updates;
 }
 
-const deleteButtonFunction = () =>{
+btnBookUpdate.addEventListener("click",()=>{
+    console.log("Old =>",oldBook);
+    console.log("New -<>",book);
+
+    returnErrorsUpdate = checkBookErrors();
+    if (returnErrorsUpdate == "") {
+        updates = checkBookFormUpdates();
+        if (updates =="") {
+         //no any changes   
+         alert("There are no updates")
+        }else{
+           userConfirmation =  confirm("Changes detected..."+ updates)
+            if (userConfirmation) {
+                
+                //if user press yes
+                let serverResponse = ""
+                $.ajax("/book",{
+                 async : false,
+                 type : "PUT",
+                 contentType: "application/json",
+                 data: JSON.stringify(book),
+                 success: function(data){
+                     console.log(data);
+                     serverResponse = data;
+                 },
+                 error: function(resOb){
+                     alert("error"+ resOb)
+                     serverResponse = resOb;
+                 }
+                })
+                // return serverResponse;
+                if (serverResponse == "OK") {
+                     alert("Update successFully");
+                    
+                }else{
+                    alert("Update failureFully");
+                }
+            }
+        //table refresh
+        
+        refreshBookTable()
+    }
+   
+
+    }else{
+        alert("There is some errors happened...!")
+    }
+})
+
+
+
+const deleteButtonFunction = (ob) =>{
     console.log("Delete");
+    userConfirmation = confirm("Are you sure you want to delete" +ob.name +"")
+    if (userConfirmation) {
+                    //if user press yes
+                    let serverResponse = ""
+                    $.ajax("/book",{
+                     async : false,
+                     type : "DELETE",
+                     contentType: "application/json",
+                     data: JSON.stringify(ob),
+                     success: function(data){
+                         console.log(data);
+                         serverResponse = data;
+                     },
+                     error: function(resOb){
+                         alert("error"+ resOb)
+                         serverResponse = resOb;
+                     }
+                    })
+                    // return serverResponse;
+                    if(serverResponse == "OK"){
+                        alert("Deleted succefully")
+                    }else{
+                        alert("Deleted failed")
+                    }
+    }
+    refreshBookTable()
+    
+
 }
 const printEmployee = () =>{
     console.log("Print");

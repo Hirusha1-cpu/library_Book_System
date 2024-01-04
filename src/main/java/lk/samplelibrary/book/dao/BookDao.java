@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import lk.samplelibrary.book.entity.BookEntity;
 
 public interface BookDao extends JpaRepository<BookEntity,Integer> {
-    @Query(value = "SELECT b FROM BookEntity b WHERE b.isbn=?1")
+    @Query(value = "SELECT b FROM BookEntity b WHERE b.isbn=?1") // ? = query ekak , 1 palaweni parameter eka
     BookEntity getByIsbn(Integer integer);
 
     @Query(value = "SELECT lpad(max(bookid)+1,4,0) As bookid FROM book", nativeQuery = true)

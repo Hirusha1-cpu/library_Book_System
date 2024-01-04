@@ -3,6 +3,7 @@ package lk.samplelibrary.book.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +13,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import lk.samplelibrary.book.dao.BookDao;
 import lk.samplelibrary.book.entity.BookEntity;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 public class BookController {
@@ -57,6 +60,40 @@ public class BookController {
             return ex.getMessage();
         }
 
+    }
+
+    @PutMapping(value = "/book")
+    public String updateBook(@RequestBody BookEntity bookEntity) {
+
+        BookEntity alreadyAvailable = dao.getReferenceById(bookEntity.getId());
+        if (alreadyAvailable == null) {
+            return "No Such record";
+        }
+        BookEntity alreaBookIsbn = dao.getByIsbn(bookEntity.getIsbn());
+        if (alreaBookIsbn == null || bookEntity.getIsbn().equals(alreaBookIsbn.getIsbn())) {
+            dao.save(bookEntity);
+            return "OK";
+        }
+
+        return "OK";
+
+    }
+
+    @DeleteMapping(value = "/book")
+    public String deleteBook(@RequestBody BookEntity bookEntity){
+    try {
+        String nextBookId = dao.getNextBookId();
+        if (nextBookId == null) {
+            bookEntity.setBookId("0001");
+        }else{
+            bookEntity.setBookId(nextBookId);
+        }
+        bookEntity.setDeleted(true);
+        dao.save(bookEntity);
+        return "OK";
+    } catch (Exception e) {
+        return "Erroe";
+    }
     }
 
 }

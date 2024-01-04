@@ -55,6 +55,9 @@ public class BookEntity {
     @JoinColumn(name = "booktype_id", referencedColumnName = "id")
     private BookTypeEntity booktype_id;
 
+    @Column(name ="deleted")
+    private boolean deleted;
+
 
 
 }
